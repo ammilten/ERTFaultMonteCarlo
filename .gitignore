@@ -3,3 +3,7 @@
 *.ipynb
 data/*
 e4d/*
+*.png
+*.dat
+*.txt
+*.csv
