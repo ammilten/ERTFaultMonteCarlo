@@ -1,0 +1,5 @@
+*.pyc
+*.m~
+*.ipynb
+data/*
+e4d/*
