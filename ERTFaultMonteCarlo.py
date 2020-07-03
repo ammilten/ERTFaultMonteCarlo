@@ -4,7 +4,7 @@ import numpy as np
 from ERTsim import PHert
 from multiprocessing import Pool
 import time
-import sys, getopt
+import sys, getopt, os
 
 # ---------------------- Construct Distributions ---------------------
 def construct_dists(dip, H, xpos, rho_fault, rho_back):
@@ -17,7 +17,7 @@ def construct_dists(dip, H, xpos, rho_fault, rho_back):
     return dipd, Hd, xposd, rho_faultd, rho_backd
 
 # ------------- Sample & Save Parameters ---------------------
-def save_params(dep, xtra, Q, dip, H, xpos, rho_fault, rho_back, N, MCfolder):
+def save_params(dep, xtra, Q, dip, H, xpos, rho_fault, rho_back, N, MCfolder, override):
     dipd, Hd, xposd, rho_faultd, rho_backd = construct_dists(dip, H, xpos, rho_fault, rho_back)
     
     dips = dipd.rvs(N)
@@ -25,6 +25,15 @@ def save_params(dep, xtra, Q, dip, H, xpos, rho_fault, rho_back, N, MCfolder):
     xposs = xposd.rvs(N)
     rho_faults = rho_faultd.rvs(N)
     rho_backs = rho_backd.rvs(N)
+
+    try:
+        os.mkdir(MCfolder)
+    except FileExistsError:
+        if override:
+            print("MC folder already exists. Overriding.")
+        else:
+            print("MC folder already exists. Aborting. Pass the argument -o to override")
+            sys.exit(2)
 
     with open(MCfolder+'params.dat',"w") as pf:
         pf.write(str(dep)+"\t#dep\n")
@@ -88,15 +97,16 @@ def get_args(argv):
     nproc = None
     MCfolder = ''
     foundMC = False
+    override = False
 
     try:
-        opts, args = getopt.getopt(argv,"hf:q:n:p:d",["mcfolder=","quality=","nreals=","showdists","parallel"])
+        opts, args = getopt.getopt(argv,"hf:q:n:p:do",["mcfolder=","quality=","nreals=","showdists","parallel","override"])
     except getopt.GetoptError:
-        print("ERTMonteCarlo.py -f <path_to_mcfolder> -q <min_angle> -n <num_reals> -p <num_processors> -d")
+        print("ERTMonteCarlo.py -f <path_to_mcfolder> -q <min_angle> -n <num_reals> -p <num_processors> -d -o")
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print("ERTMonteCarlo.py -f <path_to_mcfolder> -q <min_angle> -n <num_reals> -p <num_processors> -d")
+            print("\nUSAGE:\npython ERTFaultMonteCarlo.py -f <path_to_mcfolder> -n <num_reals> -q <quality>\n\nSWITCHES:\n  -f, --mcfolder <folder>: Path to Monte Carlo output folder (required)\n  -q, --quality <min_angle>: Minimum mesh angle. 14=low quality, 34=high quality (default=14)\n  -n, --nreals <num_reals>: Number of realizations (default=1)\n  -p, --parallel <num_processors>: If specified, run in parallel. Option to specify number of of processors. If number of processors is not specified, it is auto-selected.\n  -d, --showdists: If specified, plot the parameter distributions prior to simulations.\n  -o, --override: If specified, the Monte Carlo will overwrite the data in MCfolder if MCfolder already exists.")
             sys.exit(2)
         elif opt in ("-q", "--quality"):
             Q = float(arg)
@@ -107,6 +117,8 @@ def get_args(argv):
             foundMC = True
         elif opt in ("-d", "--showdists"):
             showDists = True
+        elif opt in ("-o", "--override"):
+            override = True
         elif opt in ("-p", "--parallel"):
             parallel = True
             try:
@@ -118,7 +130,7 @@ def get_args(argv):
         print("MCfolder argument required: use '-f <path_to_mcfolder>' or '--mcfolder <path_to_mcfolder>'")
         sys.exit(2)
 
-    print("\nMCfolder = "+MCfolder)
+    print("MCfolder = "+MCfolder)
     print("Minimum angle = " + str(Q) + "    (14 = low quality mesh, 34 = high quality mesh)")
     print("Number of realizations = " + str(N))
     if parallel:
@@ -134,14 +146,15 @@ def get_args(argv):
         print("Plotting distributions = false")
 
     print("")
-    return MCfolder, Q, N, showDists, parallel, nproc
+    return MCfolder, Q, N, showDists, parallel, nproc, override
 
 
 
 #------------------ MAIN SCRIPT -----------------------
 if __name__ == "__main__":
 
-    MCfolder, Q, N, showDists, parallel, nproc = get_args(sys.argv[1:])
+    print("\n----------- Preparing Monte Carlo -----------")
+    MCfolder, Q, N, showDists, parallel, nproc, override = get_args(sys.argv[1:])
 
 #    MCfolder = '/home/ammilten/Programs/ERTFaultMonteCarlo/data/MC/'
 
@@ -158,13 +171,14 @@ if __name__ == "__main__":
 
 
     # Sample & save
-    PARAMS = save_params(dep, xtra, Q, dip, H, xpos, rho_fault, rho_back, N, MCfolder)
+    PARAMS = save_params(dep, xtra, Q, dip, H, xpos, rho_fault, rho_back, N, MCfolder, override)
 
     # Plot distributions (optional)
     if showDists:
         plot_dists(dip, H, xpos, rho_fault, rho_back)
     
     # Simulate
+    print("-------------- Simulating --------------")
     tstart = time.time()
     if parallel:
         if nproc is None:
