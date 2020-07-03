@@ -1,9 +1,8 @@
 *.pyc
 *.m~
 *.ipynb
-data/*
-e4d/*
+archive/*
+notebooks/*
 *.png
 *.dat
-*.txt
 *.csv
