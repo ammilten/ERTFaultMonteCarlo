@@ -1,0 +1,13 @@
+200	#dep
+1000	#xtra
+15.0	#Q
+25, 165	#dip (uniform): lower, upper
+120, 40	#H (normal): mean, std
+250, 40	#xpos (normal): mean, std
+20, 10, 0.45	#rho_fault (lognormal): loc, scale, s (see scipy.stats.lognorm docs)
+40, 8, 0.9	#rho_back (lognormal): loc, scale, s (see scipy.stats.lognorm docs)
+
+2	#N
+dip, H, xpos, rho_fault, rho_back
+78.3219952087884, 143.20362447024482, 226.7582355269074, 26.26532763668256, 92.1262429151592
+99.06419331398128, 94.71460190314235, 259.2043713832619, 30.59419605291321, 44.7844332461775
