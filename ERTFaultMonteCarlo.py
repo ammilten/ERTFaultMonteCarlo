@@ -26,7 +26,7 @@ def save_params(dep, xtra, Q, dip, H, xpos, rho_fault, rho_back, N, MCfolder):
     rho_faults = rho_faultd.rvs(N)
     rho_backs = rho_backd.rvs(N)
 
-    with open(MCfolder+'params.txt',"w") as pf:
+    with open(MCfolder+'params.dat',"w") as pf:
         pf.write(str(dep)+"\t#dep\n")
         pf.write(str(xtra)+"\t#xtra\n")
         pf.write(str(Q)+"\t#Q\n")
