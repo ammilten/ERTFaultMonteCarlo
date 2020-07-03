@@ -54,6 +54,7 @@ def save_params(dep, xtra, Q, dip, H, xpos, rho_fault, rho_back, N, MCfolder, ov
 
 # ------------- Wrapper to run the simulation with one argument ---------------
 def run(params):
+    print("Simulating realization " + str(params[0]))
     real = real = MCfolder + "data_" + str(params[0]) + ".dat"
     PH = PHert(dip=params[1], H=params[2], xpos=params[3], rho_fault=params[4], rho_back=params[5], dep=params[6], xtra=params[7], Q=params[8], outfile=real)
     PH.run_full()
@@ -189,7 +190,7 @@ if __name__ == "__main__":
             pool.map(run, PARAMS)
     else:
         for i in range(N): 
-            print("--------- Working on " + str(i+1) + " of " + str(N)+" ---------") 
+            #print("--------- Working on " + str(i+1) + " of " + str(N)+" ---------") 
             run(PARAMS[i])
     tend = time.time()
     print("\nTime to simulate " + str(N) + " realizations: " + str(np.round((tend-tstart)/60,2)) + " minutes")
