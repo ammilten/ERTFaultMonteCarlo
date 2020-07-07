@@ -89,7 +89,7 @@ if __name__ == "__main__":
     xtra = 1000
 
     if imp:
-        MC = MonteCarlo.import_simulation(MCfolder,overwrite, parallel, nproc, showDists, hasSeed=False)
+        MC = MonteCarlo.import_simulation(MCfolder,overwrite, parallel, nproc, showDists)
     else:
         MC = MonteCarlo.MonteCarlo(dep, xtra, Q, dip, H, xpos, rho_fault, rho_back, N, MCfolder, overwrite, parallel, nproc, showDists)
 
