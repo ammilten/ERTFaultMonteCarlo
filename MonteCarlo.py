@@ -210,6 +210,7 @@ class MonteCarlo:
                 PARAMS = [self.PARAMS[i] for i in incomplete]
             else:
                 print("0 incomplete realizations. Exiting.")
+                print(incomplete)
                 sys.exit()
 
     
