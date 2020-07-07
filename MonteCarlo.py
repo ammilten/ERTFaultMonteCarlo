@@ -195,6 +195,8 @@ class MonteCarlo:
             real = self.MCfolder + 'data_' + str(i) + '.dat'
             if not path.exists(real):
                 incomplete.append(i)
+            else:
+                print('Realization data_' + str(i) + '.dat already exists')
         return incomplete
 
 
