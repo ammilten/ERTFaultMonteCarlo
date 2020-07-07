@@ -14,7 +14,7 @@ def get_args(argv):
     imp = False
 
     try:
-        opts, args = getopt.getopt(argv,"hf:q:n:pdoi",["mcfolder=","quality=","nreals=","showdists","parallel","overwrite","import"])
+        opts, args = getopt.getopt(argv,"hf:q:n:p:doi",["mcfolder=","quality=","nreals=","showdists","parallel","overwrite","import"])
     except getopt.GetoptError:
         print("ERTMonteCarlo.py -f <path_to_mcfolder> -q <min_angle> -n <num_reals> -p <num_processors> -d -o")
         sys.exit(2)
