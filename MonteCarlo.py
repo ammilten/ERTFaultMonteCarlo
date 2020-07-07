@@ -191,6 +191,7 @@ class MonteCarlo:
     def find_incomplete_reals(self):
         # find existing data files
         incomplete = []
+        print(self.N)
         for i in range(self.N):
             real = self.MCfolder + 'data_' + str(i) + '.dat'
             if not path.exists(real):
