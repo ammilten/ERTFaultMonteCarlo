@@ -83,7 +83,7 @@ if __name__ == "__main__":
     H = [120, 40] #normal
     xpos = [250,40] #normal
     rho_fault = [20, 10, .45] #lognormal
-    rho_back = [40, 8, .9] #lognormal
+    rho_back = [40, 30, .8] #lognormal
 
     dep = 200
     xtra = 1000

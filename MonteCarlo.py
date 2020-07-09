@@ -191,13 +191,10 @@ class MonteCarlo:
     def find_incomplete_reals(self):
         # find existing data files
         incomplete = []
-        print(self.N)
         for i in range(self.N):
             real = self.MCfolder + 'data_' + str(i) + '.dat'
             if not path.exists(real):
                 incomplete.append(i)
-            else:
-                print('Realization data_' + str(i) + '.dat already exists')
         return incomplete
 
 
@@ -213,7 +210,6 @@ class MonteCarlo:
                 PARAMS = [self.PARAMS[i] for i in incomplete]
             else:
                 print("0 incomplete realizations. Exiting.")
-                print(incomplete)
                 sys.exit()
 
     
