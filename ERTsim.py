@@ -69,38 +69,6 @@ def createFault(topo, xpos, dip, H, dep, xtra=500):
 
     return fpoly
 
-def createFault_old(topo, xpos, dip, H, dep):
-    e_bot = np.floor(np.min(topo[:,1]))
-    zbot = np.floor(np.min(topo[:,1])) - dep
-
-    Z = interpolate.interp1d(topo[:,0],topo[:,1])
-    zx = Z(xpos)
-    Dz = zx-zbot
-
-    Dx = Dz/np.tan(np.deg2rad(dip))
-    xbot = xpos + Dx
-
-    Dxbot = H/2/np.sin(np.deg2rad(dip))
-
-    LR = (xbot+Dxbot,zbot)
-    LL = (xbot-Dxbot,zbot)
-
-    zfR = zbot + (LR[0]-topo[:,0])*np.tan(np.deg2rad(dip))
-    diffR = interpolate.interp1d(zfR-topo[:,1],topo[:,0])
-    UR = (float(diffR(0)), float(Z(diffR(0))) )
-
-    zfL = zbot + (LL[0]-topo[:,0])*np.tan(np.deg2rad(dip))
-    diffL = interpolate.interp1d(zfL-topo[:,1],topo[:,0])
-    UL = (float(diffL(0)), float(Z(diffL(0))) )
-    
-    idxabove = (topo[topo[:,0] > UL[0],0]).argmin() + (topo[topo[:,0] < UL[0],0]).shape[0]
-    idxbelow = (topo[topo[:,0] < UR[0],0]).argmax()
-
-    middles = [(topo[j,0],topo[j,1]) for j in range(idxabove,idxbelow)]
-    verts = [LL, UL] + middles + [UR,LR]
-    fpoly = mt.createPolygon(verts, isClosed=True, addNodes=3, marker=1)
-
-    return fpoly
 # ---------- Create mesh ---------------------
 def createMesh(geom, topo, sfile, Q):
 
@@ -121,10 +89,7 @@ def createMesh(geom, topo, sfile, Q):
     return scheme, mesh
 
 # -------------- Simulate --------------------
-def runSim(mesh, scheme, rho_fault, rho_back, outfile):
-    rhomap = [[0, rho_back],
-              [1, rho_fault],
-              [2, rho_back]]
+def runSim(mesh, scheme, rhomap, outfile):
 
     data = ert.simulate(mesh, scheme=scheme, res=rhomap, noiseLevel=1, noiseAbs=1e-6, seed=1337, calcOnly=True)
 
@@ -140,7 +105,7 @@ def runSim(mesh, scheme, rho_fault, rho_back, outfile):
     if outfile is not None:
         data.save(outfile)
 
-    return data, rhomap
+    return data
 
 class PHert:
     def __init__(self, dip=60, H=100, xpos=250, rho_fault=30, rho_back=50, efile=None, sfile=None, dep=200, xtra=500, Q=20, outfile=None):
@@ -163,6 +128,10 @@ class PHert:
         else:
             self.sfile = sfile
 
+        self.rhomap = [[0, rho_back],
+              [1, rho_fault],
+              [2, rho_back]]
+
     def create_geom(self):
         topo, tpoly = createTopo(self.efile,self.xtra,self.dep)
         fpoly = createFault(topo, self.xpos, self.dip, self.H, self.dep, xtra=self.xtra)
@@ -173,49 +142,76 @@ class PHert:
         pg.show(geom)
         return 
 
+    def show_mesh(self, showMesh=True, caxis=None):
+        try:
+            if caxis is None:
+                pg.show(self.mesh, data=self.rhomap, label=pg.unit('res'), showMesh=True)
+            else:
+                pg.show(self.mesh, data=self.rhomap, label=pg.unit('res'), showMesh=True, cMin=caxis[0], cMax=caxis[1])
+        except:
+            topo, tpoly = createTopo(self.efile,self.xtra,self.dep)
+            fpoly = createFault(topo, self.xpos, self.dip, self.H, self.dep)
+            self.scheme, self.mesh = createMesh(tpoly+fpoly, topo, self.sfile, self.Q)
+            if caxis is None:
+                pg.show(self.mesh, data=self.rhomap, label=pg.unit('res'), showMesh=True)
+            else:
+                pg.show(self.mesh, data=self.rhomap, label=pg.unit('res'), showMesh=True, cMin=caxis[0], cMax=caxis[1])
+
+        return
+
     def run_full(self, showPlot=False):
         print('Creating topo...')
         topo, tpoly = createTopo(self.efile,self.xtra,self.dep)
 
         print('Creating fault...')
         fpoly = createFault(topo, self.xpos, self.dip, self.H, self.dep)
+        self.geom = tpoly+fpoly
 
         print('Meshing...')
-        scheme, mesh = createMesh(tpoly+fpoly, topo, self.sfile, self.Q)
+        self.scheme, self.mesh = createMesh(self.geom, topo, self.sfile, self.Q)
 
         print('Simulating ERT...')
-        data, rhomap = runSim(mesh, scheme, self.rho_fault, self.rho_back, self.outfile)
+        self.data = runSim(self.mesh, self.scheme, self.rhomap, self.outfile)
 
         if showPlot:
-            srv = pd.read_csv(self.sfile,sep='\t',header=None)
-            C = (srv.values[:,4]-srv.values[:,2])/2
-            M = C + srv.values[:,2]
-            R = np.array([data('r')[i] for i in range(data('r').size())])
-            vmin = np.min((np.min(R),np.min(srv.values[:,5])))
-            vmax = np.max((np.max(R),np.max(srv.values[:,5])))
-
-            fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
-
-            pg.show(tpoly+fpoly, ax=ax1)
-            ax1.set_title('Geometry')
-
-            syn = ax2.scatter(M,-C,10,c=np.log(R))
-            ax2.set_title('Synthetic')
-            fig.colorbar(syn, ax=ax2, label='Resistance (Ohm)')
-            syn.set_clim(np.log(vmin),np.log(vmax))
-
-            pg.show(mesh, ax=ax3, data=rhomap, label=pg.unit('res'), showMesh=True)
-            ax3.set_title('Mesh')
-
-            tru = ax4.scatter(M,-C,10,c=np.log(srv.values[:,5]))
-            ax4.set_title('True')
-            fig.colorbar(tru, ax=ax4, label='Resistance (Ohm)')
-            tru.set_clim(np.log(vmin),np.log(vmax))
-
-            fig.tight_layout()
-            plt.show()
+            self.show_data()
         
-        return data
+        return self.data
+    
+    def show_data(self):
+        srv = pd.read_csv(self.sfile,sep='\t',header=None)
+        elec = pd.read_csv(self.efile,sep='\t',header=None)
+        M = (elec.values[srv.values[:,2][:].astype(int)-1,1]+elec.values[srv.values[:,4][:].astype(int)-1,1])/2
+        C = (elec.values[srv.values[:,1][:].astype(int)-1,3]+elec.values[srv.values[:,3][:].astype(int)-1,3])/2 - (elec.values[srv.values[:,4][:].astype(int)-1,1]-elec.values[srv.values[:,2][:].astype(int)-1,1])/2
+
+#        C = (srv.values[:,4]-srv.values[:,2])/2
+#        M = C + srv.values[:,2]
+        R = np.array([self.data('r')[i] for i in range(self.data('r').size())])
+        vmin = np.min((np.min(R),np.min(srv.values[:,5])))
+        vmax = np.max((np.max(R),np.max(srv.values[:,5])))
+
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+
+        pg.show(self.geom, ax=ax1)
+        ax1.set_title('Geometry')
+
+        syn = ax2.scatter(M,C,10,c=np.log(R))
+        ax2.set_title('Synthetic')
+        fig.colorbar(syn, ax=ax2, label='Resistance (Ohm)')
+        syn.set_clim(np.log(vmin),np.log(vmax))
+
+        pg.show(self.mesh, ax=ax3, data=self.rhomap, label=pg.unit('res'), showMesh=True)
+        ax3.set_title('Mesh')
+
+        tru = ax4.scatter(M,C,10,c=np.log(srv.values[:,5]))
+        ax4.set_title('True')
+        fig.colorbar(tru, ax=ax4, label='Resistance (Ohm)')
+        tru.set_clim(np.log(vmin),np.log(vmax))
+
+        fig.tight_layout()
+        plt.show()
+        return
+
 
 
 # ------------------------------------------

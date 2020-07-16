@@ -179,13 +179,17 @@ class MonteCarlo:
         plt.show()
         return
 
+    def prepare_realization(self,i):
+        real = self.MCfolder + "data_" + str(self.PARAMS[i][0]) + ".dat"
+        PH = PHert(dip=self.PARAMS[i][1], H=self.PARAMS[i][2], xpos=self.PARAMS[i][3], rho_fault=self.PARAMS[i][4], rho_back=self.PARAMS[i][5], dep=self.PARAMS[i][6], xtra=self.PARAMS[i][7], Q=self.PARAMS[i][8], outfile=real)
+        return PH
+
     # ------------- Wrapper to run a realization ---------------
     def realize(self, i):
         print("Simulating realization " + str(self.PARAMS[i][0]))
-        real = self.MCfolder + "data_" + str(self.PARAMS[i][0]) + ".dat"
-        PH = PHert(dip=self.PARAMS[i][1], H=self.PARAMS[i][2], xpos=self.PARAMS[i][3], rho_fault=self.PARAMS[i][4], rho_back=self.PARAMS[i][5], dep=self.PARAMS[i][6], xtra=self.PARAMS[i][7], Q=self.PARAMS[i][8], outfile=real)
+        PH = self.prepare_realization(i)
         PH.run_full()
-        return
+        return PH
 
     # ------------- Find realizations that have already been run -------
     def find_incomplete_reals(self):

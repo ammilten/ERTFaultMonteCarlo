@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
     dip = [25, 165] #uniform
     H = [120, 40] #normal
-    xpos = [250,40] #normal
+    xpos = [400,40] #normal
     rho_fault = [20, 10, .45] #lognormal
     rho_back = [40, 30, .8] #lognormal
 
