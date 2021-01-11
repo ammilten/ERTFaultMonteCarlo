@@ -3,5 +3,4 @@
 *.ipynb
 archive/*
 *.png
-*.dat
 *.csv
