@@ -132,6 +132,10 @@ class PHert:
               [1, rho_fault],
               [2, rho_back]]
 
+    def create_fault(self):
+        topo, _ = createTopo(self.efile,self.xtra,self.dep)
+        return createFault(topo, self.xpos, self.dip, self.H, self.dep, xtra=self.xtra)
+
     def create_geom(self):
         topo, tpoly = createTopo(self.efile,self.xtra,self.dep)
         fpoly = createFault(topo, self.xpos, self.dip, self.H, self.dep, xtra=self.xtra)
@@ -142,35 +146,39 @@ class PHert:
         pg.show(geom)
         return 
 
-    def show_mesh(self, showMesh=True, caxis=None):
+    def show_mesh(self, showMesh=True, caxis=None, cmap="hsv"):
         try:
             if caxis is None:
-                pg.show(self.mesh, data=self.rhomap, label=pg.unit('res'), showMesh=True)
+                pg.show(self.mesh, data=self.rhomap, label=pg.unit('res'), showMesh=showMesh, cMap=cmap)
             else:
-                pg.show(self.mesh, data=self.rhomap, label=pg.unit('res'), showMesh=True, cMin=caxis[0], cMax=caxis[1])
+                pg.show(self.mesh, data=self.rhomap, label=pg.unit('res'), showMesh=showMesh, cMin=caxis[0], cMax=caxis[1],cMap=cmap)
         except:
             topo, tpoly = createTopo(self.efile,self.xtra,self.dep)
             fpoly = createFault(topo, self.xpos, self.dip, self.H, self.dep)
             self.scheme, self.mesh = createMesh(tpoly+fpoly, topo, self.sfile, self.Q)
             if caxis is None:
-                pg.show(self.mesh, data=self.rhomap, label=pg.unit('res'), showMesh=True)
+                pg.show(self.mesh, data=self.rhomap, label=pg.unit('res'), showMesh=showMesh,cMap=cmap)
             else:
-                pg.show(self.mesh, data=self.rhomap, label=pg.unit('res'), showMesh=True, cMin=caxis[0], cMax=caxis[1])
+                pg.show(self.mesh, data=self.rhomap, label=pg.unit('res'), showMesh=showMesh, cMin=caxis[0], cMax=caxis[1],cMap=cmap)
 
         return
 
-    def run_full(self, showPlot=False):
-        print('Creating topo...')
+    def run_full(self, showPlot=False, verbose=False):
+        if verbose:
+            print('Creating topo...')
         topo, tpoly = createTopo(self.efile,self.xtra,self.dep)
 
-        print('Creating fault...')
+        if verbose:
+            print('Creating fault...')
         fpoly = createFault(topo, self.xpos, self.dip, self.H, self.dep)
         self.geom = tpoly+fpoly
 
-        print('Meshing...')
+        if verbose:
+            print('Meshing...')
         self.scheme, self.mesh = createMesh(self.geom, topo, self.sfile, self.Q)
 
-        print('Simulating ERT...')
+        if verbose:
+            print('Simulating ERT...')
         self.data = runSim(self.mesh, self.scheme, self.rhomap, self.outfile)
 
         if showPlot:
