@@ -2,7 +2,6 @@
 *.m~
 *.ipynb
 archive/*
-notebooks/*
 *.png
 *.dat
 *.csv
