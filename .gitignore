@@ -1,6 +1,5 @@
 *.pyc
 *.m~
-*.ipynb
 archive/*
 *.png
 *.csv
