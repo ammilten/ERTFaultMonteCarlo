@@ -12,15 +12,16 @@ def get_args(argv):
     foundMC = False
     overwrite = False
     imp = False
+    seed = 0
 
     try:
-        opts, args = getopt.getopt(argv,"hf:q:n:p:doi",["mcfolder=","quality=","nreals=","showdists","parallel","overwrite","import"])
+        opts, args = getopt.getopt(argv,"hf:q:n:p:doi",["mcfolder=","quality=","nreals=","seed=","showdists","parallel","overwrite","import"])
     except getopt.GetoptError:
-        print("ERTMonteCarlo.py -f <path_to_mcfolder> -q <min_angle> -n <num_reals> -p <num_processors> -d -o")
+        print("ERTMonteCarlo.py -f <path_to_mcfolder> -q <min_angle> -n <num_reals> -s <seed> -p <num_processors> -d -o")
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print("\nBASIC USAGE:\npython ERTFaultMonteCarlo.py -f <path_to_mcfolder> -n <num_reals>\n\nSWITCHES:\n  -f, --mcfolder <folder>: Path to Monte Carlo output folder (required)\n  -q, --quality <min_angle>: Minimum mesh angle. 14=low quality, 34=high quality (default=14)\n  -n, --nreals <num_reals>: Number of realizations (default=1)\n  -p, --parallel <num_processors>: If specified, run in parallel. Option to specify number of of processors. If number of processors is not specified, it is auto-selected.\n  -d, --showdists: If specified, plot the parameter distributions prior to simulations.\n  -o, --override: If specified, the Monte Carlo will overwrite the data in MCfolder if MCfolder already exists.\n  -i, --import: If specified, the program will attempt to load Monte Carlo parameters from <MCfolder>/params.dat.")
+            print("\nBASIC USAGE:\npython ERTFaultMonteCarlo.py -f <path_to_mcfolder> -n <num_reals>\n\nSWITCHES:\n  -f, --mcfolder <folder>: Path to Monte Carlo output folder (required)\n  -q, --quality <min_angle>: Minimum mesh angle. 14=low quality, 34=high quality (default=14)\n  -n, --nreals <num_reals>: Number of realizations (default=1)\n  -s, --seed <seed>: Random number seed (default=0)\n  -p, --parallel <num_processors>: If specified, run in parallel. Option to specify number of of processors. If number of processors is not specified, it is auto-selected.\n  -d, --showdists: If specified, plot the parameter distributions prior to simulations.\n  -o, --override: If specified, the Monte Carlo will overwrite the data in MCfolder if MCfolder already exists.\n  -i, --import: If specified, the program will attempt to load Monte Carlo parameters from <MCfolder>/params.dat.")
             sys.exit(2)
         elif opt in ("-q", "--quality"):
             Q = float(arg)
@@ -35,6 +36,8 @@ def get_args(argv):
             overwrite = True
         elif opt in ("-i", "--import"):
             imp = True
+        elif opt in ("-s", "--seed"):
+            seed = float(arg)
         elif opt in ("-p", "--parallel"):
             parallel = True
             try:
@@ -52,6 +55,7 @@ def get_args(argv):
     print("MCfolder = "+MCfolder)
     print("Minimum angle = " + str(Q) + "    (14 = low quality mesh, 34 = high quality mesh)")
     print("Number of realizations = " + str(N))
+    print("Random number seed = " + str(seed))
     if parallel:
         if nproc is None:
             print("Parallelized = true (auto-select number of processors)")
@@ -67,7 +71,7 @@ def get_args(argv):
         print("\n** Simulation will be imported from '" + MCfolder + "params.dat'.\n   Mesh quality and number of realizations above may be incorrect.")
 
     print("")
-    return MCfolder, Q, N, showDists, parallel, nproc, overwrite, imp
+    return MCfolder, Q, N, showDists, parallel, nproc, overwrite, imp, seed
 
 
 
@@ -75,7 +79,7 @@ def get_args(argv):
 if __name__ == "__main__":
 
     print("\n----------- Preparing Monte Carlo -----------")
-    MCfolder, Q, N, showDists, parallel, nproc, overwrite, imp = get_args(sys.argv[1:])
+    MCfolder, Q, N, showDists, parallel, nproc, overwrite, imp, seed = get_args(sys.argv[1:])
 
 #    MCfolder = '/home/ammilten/Programs/ERTFaultMonteCarlo/data/MC/'
 
@@ -91,7 +95,7 @@ if __name__ == "__main__":
     if imp:
         MC = MonteCarlo.import_simulation(MCfolder,overwrite, parallel, nproc, showDists)
     else:
-        MC = MonteCarlo.MonteCarlo(dep, xtra, Q, dip, H, xpos, rho_fault, rho_back, N, MCfolder, overwrite, parallel, nproc, showDists)
+        MC = MonteCarlo.MonteCarlo(dep, xtra, Q, dip, H, xpos, rho_fault, rho_back, N, MCfolder, overwrite, parallel, nproc, showDists, seed=seed)
 
     MC.run()
 

@@ -152,8 +152,8 @@ class MonteCarlo:
 
 
     # ------------- Plots the 5 distributions --------------------
-    def plot_dists(self):
-        fig, axs = plt.subplots(5,1)
+    def plot_dists(self,figsize=(10,10)):
+        fig, axs = plt.subplots(5,1,figsize=figsize)
 
         x = np.linspace(self.dipd.ppf(0.001)-10, self.dipd.ppf(0.999)+10, 1000)
         axs[0].plot(x,self.dipd.pdf(x))
