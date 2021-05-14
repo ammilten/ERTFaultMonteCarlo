@@ -224,13 +224,11 @@ class PHert:
 
 # ------------------------------------------
 if __name__ == "__main__":
+    ERT = PHert(rho_fault=37, rho_back=121, H=87, xpos=384, dip=126, Q=16, area=500, heterogeneity=True) # Desired
+    # ERT = PHert(rho_fault=30, rho_back=60, H=300, Q=14, heterogeneity=False, area=None) # Test
 
-    PH = PHert(xpos=300,dip=15,Q=14, xtra=1000)
-    #PH.show_geom()
-    PH.run_full(showPlot=True)
-
-
-
-
+    ERT.run_full(verbose=True)
+    pkl.dump(ERT.rhomap,open("rhomap.pkl","wb"))
+    ERT.data.save("ert.data")
 
 
