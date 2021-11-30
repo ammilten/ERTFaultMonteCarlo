@@ -1,4 +1,4 @@
-import MonteCarlo_fraczonefloodplain as MonteCarlo
+import MonteCarlo_fraczonefloodplainsoil as MonteCarlo
 import sys, getopt, os
 
 # ---------------- Parse arguments ---------------------
