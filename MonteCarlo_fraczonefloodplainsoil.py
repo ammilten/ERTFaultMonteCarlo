@@ -10,7 +10,7 @@ from os import path
 # ------------- Wrapper to run a realization ---------------
 def realize(params):
     print("Simulating realization " + str(params[0]))
-    MCfolder = params[9]
+    MCfolder = params[13]
     real = MCfolder + "data_" + str(params[0]) + ".dat"
 
     PH = PHert(dip=params[1], H=params[2], xpos=params[3], rho_fault=params[4], rho_back=params[5], shdep=params[6], rho_sh=params[7], fpthx=params[8], rho_fp=params[9],dep=params[10], xtra=params[11], Q=params[12], outfile=real)
