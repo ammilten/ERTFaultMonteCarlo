@@ -37,13 +37,13 @@ def import_simulation(MCfolder, overwrite=False, parallel=False, nproc=None, sho
         Q = float(pf.readline().split(comm,1)[0])
 
         ln = pf.readline().split(comm,1)[0].split(sep)
-        thx_soil = [float(thx_ln[0]), float(thx_ln[1])]
+        thx_soil = [float(ln[0]), float(ln[1])]
         
         ln = pf.readline().split(comm,1)[0].split(sep)
-        thx_subsoil = [float(thx_ln[0]), float(thx_ln[1])]
+        thx_subsoil = [float(ln[0]), float(ln[1])]
         
         ln = pf.readline().split(comm,1)[0].split(sep)
-        thx_weathered = [float(thx_ln[0]), float(thx_ln[1])]
+        thx_weathered = [float(ln[0]), float(ln[1])]
         
         ln = pf.readline().split(comm,1)[0].split(sep)
         rho_soil = [float(ln[0]), float(ln[1]), float(ln[2])]
@@ -57,7 +57,7 @@ def import_simulation(MCfolder, overwrite=False, parallel=False, nproc=None, sho
         ln = pf.readline().split(comm,1)[0].split(sep)
         rho_bedrock = [float(ln[0]), float(ln[1]), float(ln[2])]
 
-        pf.readline() # THIS LINE ASSUMES THERE IS A SPACE
+        #pf.readline() # THIS LINE ASSUMES THERE IS A SPACE
         if hasSeed:
             seed = int(pf.readline().split(comm,1)[0])
         else:
@@ -65,13 +65,13 @@ def import_simulation(MCfolder, overwrite=False, parallel=False, nproc=None, sho
         N = int(pf.readline().split(comm,1)[0])
 
         pf.readline() # Skip the header
-        thx_soil = [None]*N
-        thx_subsoil = [None]*N
-        thx_weathered = [None]*N
-        rho_soil = [None]*N
-        rho_subsoil = [None]*N
-        rho_weathered = [None]*N
-        rho_bedrock = [None]*N
+        thx_soils = [None]*N
+        thx_subsoils = [None]*N
+        thx_weathereds = [None]*N
+        rho_soils = [None]*N
+        rho_subsoils = [None]*N
+        rho_weathereds = [None]*N
+        rho_bedrocks = [None]*N
         for i in range(N):
             params = pf.readline().split(sep)
             thx_soils[i] = float(params[0])
