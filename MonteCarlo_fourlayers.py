@@ -14,7 +14,7 @@ def realize(params):
     MCfolder = params[11]
     real = MCfolder + "data_" + str(params[0]) + ".dat"
 
-    PH = PHert(dip=params[1], H=params[2], xpos=params[3], rho_fault=params[4], rho_back=params[5], dep=params[6], xtra=params[7], Q=params[8], outfile=real)
+    PH = PHert(thx_soil=params[1], thx_subsoil=params[2], thx_weathered=params[3], rho_soil=params[4], rho_subsoil=params[5], rho_weathered=params[6], rho_bedrock=params[7], dep=params[8], xtra=params[9], Q=params[10], outfile=real)
     PH.run_full()
     return
 
